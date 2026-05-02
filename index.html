@@ -182,7 +182,7 @@
   <!-- VIEWS -->
   <div id="view-overview" class="view active">
     <!-- Balance Grid -->
-    <div class="stats-grid triple">
+    <div class="stats-grid">
         <div class="stat-card small clickable-card" onclick="openBalanceModal()">
           <span class="label-muted">Current<br>Balance</span>
           <div class="stat-val" id="ovMonthlyIncome">₹0</div>
@@ -190,10 +190,6 @@
         <div class="stat-card small">
           <span class="label-muted">Post-<br>Allocation</span>
           <div class="stat-val" id="ovSavings" style="color: var(--text-sec)">₹0</div>
-        </div>
-        <div class="stat-card small">
-          <span class="label-muted">Real-time<br>Balance</span>
-          <div class="stat-val" id="ovRealBalance" style="color: var(--accent)">₹0</div>
         </div>
     </div>
 
@@ -485,14 +481,11 @@ function renderOverview() {
   const p = budget > 0 ? Math.min(100, (spent/budget)*100) : 0;
   
   const afterAllocation = state.monthlyIncome - budget;
-  const realTimeBalance = state.monthlyIncome - spent;
 
   document.getElementById('ovMonthlyIncome').innerText = fmt(state.monthlyIncome);
   document.getElementById('ovSavings').innerText = fmt(afterAllocation);
-  document.getElementById('ovRealBalance').innerText = fmt(realTimeBalance);
   
   document.getElementById('ovSavings').style.color = afterAllocation >= 0 ? 'var(--text-sec)' : 'var(--danger)';
-  document.getElementById('ovRealBalance').style.color = realTimeBalance >= 0 ? 'var(--accent)' : 'var(--danger)';
 
   document.getElementById('ovTotalBudget').innerText = fmt(budget);
   document.getElementById('ovProgressBar').style.width = p + "%";
