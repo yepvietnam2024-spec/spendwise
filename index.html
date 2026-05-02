@@ -66,7 +66,7 @@
   }
   .nav-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
 
-  .card { background: var(--surface); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card { background: var(--surface); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; }
   .section-header { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 16px; }
   .section-title { font-family: 'Instrument Serif', serif; font-size: 32px; letter-spacing: -0.5px; }
   
@@ -78,8 +78,15 @@
   .progress-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-sec); }
 
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .stat-card { background: var(--surface); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-  .stat-val { font-family: 'Instrument Serif', serif; font-size: 32px; }
+  .stats-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+  .stat-card { background: var(--surface); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; display: flex; flex-direction: column; justify-content: space-between; transition: background 0.2s; }
+  .stat-card.small { padding: 12px 14px; }
+  .stat-card .label-muted { font-size: 9px; margin-bottom: 4px; line-height: 1.2; }
+  .stat-val { font-family: 'Instrument Serif', serif; font-size: 28px; line-height: 1.1; }
+  .stat-card.small .stat-val { font-size: 20px; }
+
+  .clickable-card:active { background: var(--surface2); transform: scale(0.98); }
+  .clickable-card { cursor: pointer; }
 
   .chart-box { position: relative; width: 220px; height: 220px; margin: 0 auto 20px; }
   .chart-legend { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
@@ -110,9 +117,6 @@
   .tx-cat-row span { color: var(--text-muted); font-weight: 400; }
   .tx-note { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
   .tx-amt { font-family: 'Instrument Serif', serif; font-size: 20px; }
-
-  .insights-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .trend-badge { display: inline-flex; align-items: center; gap: 6px; padding: 12px; background: var(--danger-bg); color: var(--danger); border-radius: 12px; width: 100%; font-size: 13px; font-weight: 500; }
 
   .mode-toggle { display: flex; background: var(--surface2); padding: 4px; border-radius: 14px; margin-bottom: 24px; }
   .mode-btn { flex: 1; border: none; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text-sec); transition: 0.2s; }
@@ -147,7 +151,6 @@
   .modal-sub-row span { font-size: 14px; font-weight: 500; }
   .modal-sub-row button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 18px; padding: 5px; }
 
-  /* Month Option List */
   .month-option { display: block; padding: 16px; font-size: 15px; font-weight: 500; color: var(--text); border-bottom: 1px solid var(--border); cursor: pointer; text-align: center; }
   .month-option:last-child { border-bottom: none; }
   .month-option.active { color: var(--accent); background: var(--accent-light); }
@@ -176,54 +179,54 @@
     <button class="nav-tab" data-view="settings">Settings</button>
   </nav>
 
-  <!-- OVERVIEW VIEW -->
+  <!-- VIEWS -->
   <div id="view-overview" class="view active">
+    <!-- Balance Grid -->
+    <div class="stats-grid triple">
+        <div class="stat-card small clickable-card" onclick="openBalanceModal()">
+          <span class="label-muted">Current<br>Balance</span>
+          <div class="stat-val" id="ovMonthlyIncome">₹0</div>
+        </div>
+        <div class="stat-card small">
+          <span class="label-muted">Post-<br>Allocation</span>
+          <div class="stat-val" id="ovSavings" style="color: var(--text-sec)">₹0</div>
+        </div>
+        <div class="stat-card small">
+          <span class="label-muted">Real-time<br>Balance</span>
+          <div class="stat-val" id="ovRealBalance" style="color: var(--accent)">₹0</div>
+        </div>
+    </div>
+
     <div class="card">
-      <span class="label-muted">Total Budget</span>
+      <span class="label-muted">Total Budget Committed</span>
       <div class="amount-serif" id="ovTotalBudget">₹0</div>
-      <div class="progress-container">
-        <div class="progress-bar" id="ovProgressBar" style="width: 0%"></div>
-      </div>
-      <div class="progress-meta">
-        <span id="ovSpentLabel">Spent ₹0</span>
-        <span id="ovLeftLabel">₹0 left · 0%</span>
-      </div>
+      <div class="progress-container"><div class="progress-bar" id="ovProgressBar" style="width: 0%"></div></div>
+      <div class="progress-meta"><span id="ovSpentLabel">Spent ₹0</span><span id="ovLeftLabel">₹0 left · 0%</span></div>
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card">
-        <span class="label-muted">Categories</span>
-        <div class="stat-val" id="ovCatCount">0</div>
-      </div>
-      <div class="stat-card">
-        <span class="label-muted">Transactions</span>
-        <div class="stat-val" id="ovTxCount">0</div>
-      </div>
+      <div class="stat-card"><span class="label-muted">Categories</span><div class="stat-val" id="ovCatCount">0</div></div>
+      <div class="stat-card"><span class="label-muted">Transactions</span><div class="stat-val" id="ovTxCount">0</div></div>
     </div>
 
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <span class="section-title" style="font-size:24px">Distribution</span>
-        <div class="chip">Categories / Sub</div>
+        <div class="chip">By Category</div>
       </div>
-      <div class="chart-box">
-        <canvas id="distributionChart"></canvas>
-      </div>
+      <div class="chart-box"><canvas id="distributionChart"></canvas></div>
       <div id="ovLegend" class="chart-legend"></div>
     </div>
-
     <h2 class="section-title" style="margin-bottom:16px;">Categories Breakdown</h2>
     <div id="ovCatList"></div>
   </div>
 
-  <!-- TRANSACTIONS VIEW -->
   <div id="view-transactions" class="view">
     <h2 class="section-title">Transactions</h2>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Tap any expense to edit or delete</p>
     <div id="txList"></div>
   </div>
 
-  <!-- CATEGORIES VIEW -->
   <div id="view-categories" class="view">
     <div class="section-header">
       <h2 class="section-title">Categories</h2>
@@ -232,33 +235,38 @@
     <div id="catSetupList"></div>
   </div>
 
-  <!-- INSIGHTS VIEW -->
   <div id="view-insights" class="view">
     <h2 class="section-title">Insights</h2>
     <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Compare two months to see what changed</p>
-    
     <div class="card">
       <div class="insights-compare">
         <div><label class="label-muted">From</label><select id="insFromMonth" onchange="renderInsights()"></select></div>
         <div><label class="label-muted">To</label><select id="insToMonth" onchange="renderInsights()"></select></div>
       </div>
     </div>
-
     <div class="card">
       <div class="insights-compare" style="margin-bottom:24px;">
-        <div><span id="insFromLabel" class="label-muted">Apr 2026</span><div id="insFromAmt" class="stat-val">₹0</div></div>
-        <div style="text-align:right"><span id="insToLabel" class="label-muted">May 2026</span><div id="insToAmt" class="stat-val">₹0</div></div>
+        <div><span id="insFromLabel" class="label-muted">Prev Month</span><div id="insFromAmt" class="stat-val">₹0</div></div>
+        <div style="text-align:right"><span id="insToLabel" class="label-muted">Selected Month</span><div id="insToAmt" class="stat-val">₹0</div></div>
       </div>
-      <div id="insTrendBadge" class="trend-badge">📈 Spent ₹0 more (0%)</div>
+      <div id="insTrendBadge" class="trend-badge">No comparison data</div>
     </div>
-
     <h3 class="label-muted" style="margin:24px 0 12px">By category</h3>
     <div id="insCatList"></div>
   </div>
 
-  <!-- SETTINGS VIEW -->
   <div id="view-settings" class="view">
     <h2 class="section-title">Settings</h2>
+
+    <span class="label-muted">BALANCE</span>
+    <div class="card">
+        <p class="danger-desc">Manage your total current account balance.</p>
+        <div style="display: flex; gap: 8px;">
+            <input type="number" id="incomeInput" placeholder="0" style="margin-bottom: 0;">
+            <button class="chip" style="background: var(--accent); color: white; border: none; padding: 0 20px; font-size: 12px;" onclick="updateIncomeFromSettings()">Update</button>
+        </div>
+    </div>
+    
     <span class="label-muted">APPEARANCE</span>
     <div class="mode-toggle">
       <button class="mode-btn" id="modeLight" onclick="setMode('light')">Light</button>
@@ -286,13 +294,13 @@
       <p class="danger-desc">Wipe all categories, subcategories and transactions.</p>
       <button class="danger-btn" onclick="handleWipeAllData(this)">Wipe everything</button>
     </div>
-    <div class="footer-info">Spendwise · single-user · v1.2</div>
+    <div class="footer-info">Spendwise · single-user · v1.5</div>
   </div>
 </div>
 
 <button class="fab" id="fabAdd">+</button>
 
-<!-- MONTH PICKER MODAL -->
+<!-- MODALS -->
 <div class="modal-overlay" id="monthPickerModal">
   <div class="modal-content">
     <h2 class="section-title" style="margin-bottom:24px; font-size:24px">Select Month</h2>
@@ -301,14 +309,23 @@
   </div>
 </div>
 
-<!-- EXPENSE MODAL -->
+<div class="modal-overlay" id="balanceModal">
+  <div class="modal-content">
+    <h2 class="section-title" style="margin-bottom:24px; font-size:24px">Edit Balance</h2>
+    <label class="label-muted">New Current Balance (₹)</label>
+    <input type="number" id="newBalanceInput" placeholder="0">
+    <button class="form-btn" onclick="handleBalanceUpdate()">Save Balance</button>
+    <button class="form-btn" style="margin-top: 12px; background: var(--surface2); color: var(--text);" onclick="document.getElementById('balanceModal').style.display='none'">Cancel</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="expenseModal">
   <div class="modal-content">
     <h2 class="section-title" id="expModalTitle" style="margin-bottom:24px; font-size:24px">Add Expense</h2>
     <label class="label-muted">Amount (₹)</label><input type="number" id="formAmt" placeholder="0">
     <label class="label-muted">Category</label><select id="formCat" onchange="updateSubOptions()"></select>
     <label class="label-muted">Subcategory</label><select id="formSub"></select>
-    <label class="label-muted">Note</label><input type="text" id="formNote" placeholder="Dinner with friends...">
+    <label class="label-muted">Note</label><input type="text" id="formNote" placeholder="Notes...">
     <label class="label-muted">Date</label><input type="date" id="formDate">
     <div style="display:flex; gap:12px;">
       <button class="form-btn" id="saveExpBtn" onclick="saveExpense()" style="flex:2">Save Expense</button>
@@ -317,14 +334,13 @@
   </div>
 </div>
 
-<!-- CATEGORY MODAL -->
 <div class="modal-overlay" id="categoryModal">
   <div class="modal-content">
     <h2 class="section-title" id="catModalTitle" style="margin-bottom:24px; font-size:24px">Category Settings</h2>
     <label class="label-muted">Category Name</label><input type="text" id="catFormName" placeholder="e.g. Groceries">
     <label class="label-muted">Monthly Budget (₹)</label><input type="number" id="catFormBudget" placeholder="5000">
     <label class="label-muted">Color</label><input type="color" id="catFormColor" value="#2D5016" style="height: 50px; padding: 5px;">
-    <div id="subcatManagerSection" style="margin: 24px 0;">
+    <div style="margin: 24px 0;">
       <label class="label-muted">Subcategories</label>
       <div id="modalSubcatList" style="margin-bottom: 12px;"></div>
       <div style="display: flex; gap: 8px;">
@@ -343,13 +359,14 @@
 // --- DATA INITIALIZATION ---
 let state = JSON.parse(localStorage.getItem('spendwise_pro_v8')) || {
   categories: [
-    { id: "c1", name: "Ordering & Eating Outside", budget: 4000, color: "#B7410E", subs: ["Swiggy", "Going Out"] },
+    { id: "c1", name: "Ordering & Eating Outside", budget: 4000, color: "#B7410E", subs: ["Swiggy", "Going Out", "Eat"] },
     { id: "c2", name: "Groceries", budget: 6000, color: "#2D5016", subs: ["BigBasket"] },
     { id: "c3", name: "Transport", budget: 2500, color: "#1A5276", subs: ["Uber"] }
   ],
   transactions: [],
-  selectedMonth: "2026-05",
-  appearance: { mode: 'light', accent: '#2D5016' }
+  selectedMonth: new Date().toISOString().slice(0, 7),
+  appearance: { mode: 'light', accent: '#2D5016' },
+  monthlyIncome: 20000
 };
 
 if(!state.appearance) state.appearance = { mode: 'light', accent: '#2D5016' };
@@ -364,7 +381,9 @@ let currentEditingCatId = null;
 let modalSubs = [];
 
 function init() {
-  setupNavigation(); setupFAB(); setupMonthPicker(); applyAppearance(); renderAll();
+  setupNavigation(); setupFAB(); setupMonthPicker(); applyAppearance(); 
+  document.getElementById('incomeInput').value = state.monthlyIncome;
+  renderAll();
 }
 
 function applyAppearance() {
@@ -409,37 +428,46 @@ function setupMonthPicker() {
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const label = document.getElementById('currentMonthLabel');
   const btn = document.getElementById('monthPickerBtn');
-  
-  // Logic to refresh label based on state
-  const refreshLabel = () => {
-    const [y, m] = state.selectedMonth.split('-');
-    label.innerText = months[parseInt(m)-1] + " " + y;
-  };
-  
+  const refreshLabel = () => { const [y, m] = state.selectedMonth.split('-'); label.innerText = months[parseInt(m)-1] + " " + y; };
   btn.onclick = () => {
-    const list = document.getElementById('monthOptionsList');
-    list.innerHTML = "";
-    
-    // Generate 12 months (current year)
+    const list = document.getElementById('monthOptionsList'); list.innerHTML = "";
     const year = state.selectedMonth.split('-')[0];
     for(let i=1; i<=12; i++) {
         const val = `${year}-${String(i).padStart(2,'0')}`;
         const opt = document.createElement('div');
         opt.className = `month-option ${val === state.selectedMonth ? 'active' : ''}`;
         opt.innerText = months[i-1] + " " + year;
-        opt.onclick = () => {
-            state.selectedMonth = val;
-            save();
-            refreshLabel();
-            document.getElementById('monthPickerModal').style.display = 'none';
-            renderAll();
-        };
+        opt.onclick = () => { state.selectedMonth = val; save(); refreshLabel(); document.getElementById('monthPickerModal').style.display = 'none'; renderAll(); };
         list.appendChild(opt);
     }
     document.getElementById('monthPickerModal').style.display = 'flex';
   };
-  
   refreshLabel();
+}
+
+function openBalanceModal() {
+    document.getElementById('newBalanceInput').value = state.monthlyIncome;
+    document.getElementById('balanceModal').style.display = 'flex';
+}
+
+function handleBalanceUpdate() {
+    const val = parseFloat(document.getElementById('newBalanceInput').value);
+    if(isNaN(val)) return;
+    state.monthlyIncome = val;
+    document.getElementById('incomeInput').value = state.monthlyIncome;
+    save();
+    document.getElementById('balanceModal').style.display = 'none';
+    renderAll();
+    showToast("Balance updated");
+}
+
+function updateIncomeFromSettings() {
+    const val = parseFloat(document.getElementById('incomeInput').value);
+    if(isNaN(val)) return;
+    state.monthlyIncome = val;
+    save();
+    renderAll();
+    showToast("Balance updated");
 }
 
 function renderAll() {
@@ -455,6 +483,17 @@ function renderOverview() {
   const spent = txs.reduce((s, t) => s + t.amt, 0);
   const budget = state.categories.reduce((s, c) => s + c.budget, 0);
   const p = budget > 0 ? Math.min(100, (spent/budget)*100) : 0;
+  
+  const afterAllocation = state.monthlyIncome - budget;
+  const realTimeBalance = state.monthlyIncome - spent;
+
+  document.getElementById('ovMonthlyIncome').innerText = fmt(state.monthlyIncome);
+  document.getElementById('ovSavings').innerText = fmt(afterAllocation);
+  document.getElementById('ovRealBalance').innerText = fmt(realTimeBalance);
+  
+  document.getElementById('ovSavings').style.color = afterAllocation >= 0 ? 'var(--text-sec)' : 'var(--danger)';
+  document.getElementById('ovRealBalance').style.color = realTimeBalance >= 0 ? 'var(--accent)' : 'var(--danger)';
+
   document.getElementById('ovTotalBudget').innerText = fmt(budget);
   document.getElementById('ovProgressBar').style.width = p + "%";
   document.getElementById('ovSpentLabel').innerText = `Spent ${fmt(spent)}`;
@@ -470,41 +509,21 @@ function renderOverviewCats(txs) {
     const catTxs = txs.filter(t => t.catId === cat.id);
     const s = catTxs.reduce((sum, t) => sum + t.amt, 0);
     const p = Math.min(100, (s/cat.budget)*100);
-    const statusText = `${Math.round(p)}% used`;
-
     const subBreakdownHtml = cat.subs.map(subName => {
       const subSpent = catTxs.filter(t => t.sub === subName).reduce((sum, t) => sum + t.amt, 0);
       const subPerc = cat.budget > 0 ? Math.min(100, (subSpent / cat.budget) * 100) : 0;
-      return `
-        <div class="sub-breakdown-item">
-          <span class="sub-name-label">${subName}</span>
-          <div class="sub-progress-line">
-            <div class="sub-progress-fill" style="width:${subPerc}%; background:${cat.color}"></div>
-          </div>
-          <span class="sub-amt-label">${fmt(subSpent)}</span>
-        </div>
-      `;
+      return `<div class="sub-breakdown-item"><span class="sub-name-label">${subName}</span><div class="sub-progress-line"><div class="sub-progress-fill" style="width:${subPerc}%; background:${cat.color}"></div></div><span class="sub-amt-label">${fmt(subSpent)}</span></div>`;
     }).join('');
-
     return `
-      <div class="card" style="padding: 18px 20px; border: 1px solid var(--border);">
+      <div class="card" style="padding: 18px 20px;">
         <div class="cat-card-header" style="margin-bottom:12px;">
-          <div class="cat-info">
-            <div class="dot" style="background:${cat.color}"></div>
-            <span style="font-weight:500; font-size:16px;">${cat.name}</span>
-          </div>
-          <div class="cat-badge" style="background:var(--accent-light); color:var(--accent);">${statusText}</div>
+          <div class="cat-info"><div class="dot" style="background:${cat.color}"></div><span style="font-weight:500;">${cat.name}</span></div>
+          <div class="cat-badge" style="background:var(--accent-light); color:var(--accent);">${Math.round(p)}% used</div>
         </div>
-        <div class="progress-container" style="height:6px; margin: 0 0 10px; background:var(--surface2);">
-          <div class="progress-bar" style="width:${p}%; background:${cat.color}"></div>
-        </div>
-        <div class="progress-meta" style="font-size:12px; margin-bottom: 14px; color:var(--text-sec);">
-          <span>${fmt(s)} spent</span>
-          <span>${fmt(Math.max(0, cat.budget - s))} left of ${fmt(cat.budget)}</span>
-        </div>
+        <div class="progress-container" style="height:6px; margin: 0 0 10px;"><div class="progress-bar" style="width:${p}%; background:${cat.color}"></div></div>
+        <div class="progress-meta" style="font-size:12px; margin-bottom: 14px;"><span>${fmt(s)} spent</span><span>${fmt(Math.max(0, cat.budget - s))} left of ${fmt(cat.budget)}</span></div>
         ${cat.subs.length > 0 ? `<div class="sub-breakdown-list">${subBreakdownHtml}</div>` : ''}
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
@@ -655,25 +674,19 @@ function handleWipeAllData(btn) {
 }
 
 function renderInsights() {
-  const months = ["2026-04", "2026-05"];
+  const months = ["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"];
   const selectFrom = document.getElementById('insFromMonth');
   const selectTo = document.getElementById('insToMonth');
-  
   if(!selectFrom.options.length) {
     selectFrom.innerHTML = months.map(m => `<option ${m===state.selectedMonth?'':'selected'}>${m}</option>`).join('');
     selectTo.innerHTML = months.map(m => `<option ${m===state.selectedMonth?'selected':''}>${m}</option>`).join('');
   }
-
-  const mFrom = selectFrom.value;
-  const mTo = selectTo.value;
-  
+  const mFrom = selectFrom.value; const mTo = selectTo.value;
   const txF = state.transactions.filter(t => t.date.startsWith(mFrom));
   const txT = state.transactions.filter(t => t.date.startsWith(mTo));
   const tF = txF.reduce((s,t)=>s+t.amt,0); const tT = txT.reduce((s,t)=>s+t.amt,0);
   const diff = tT - tF; const p = tF > 0 ? Math.round((diff/tF)*100) : 0;
-  
-  document.getElementById('insFromLabel').innerText = mFrom;
-  document.getElementById('insToLabel').innerText = mTo;
+  document.getElementById('insFromLabel').innerText = mFrom; document.getElementById('insToLabel').innerText = mTo;
   document.getElementById('insFromAmt').innerText = fmt(tF); document.getElementById('insToAmt').innerText = fmt(tT);
   document.getElementById('insTrendBadge').innerHTML = `${diff > 0 ? '📈' : '📉'} Spent ${fmt(Math.abs(diff))} ${diff > 0 ? 'more' : 'less'} (${p}%)`;
   document.getElementById('insCatList').innerHTML = state.categories.map(cat => {
@@ -684,10 +697,7 @@ function renderInsights() {
   }).join('');
 }
 
-function populateCategorySelect() {
-  document.getElementById('formCat').innerHTML = state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-  updateSubOptions();
-}
+function populateCategorySelect() { document.getElementById('formCat').innerHTML = state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join(''); updateSubOptions(); }
 function updateSubOptions() {
   const cat = state.categories.find(c => c.id === document.getElementById('formCat').value);
   document.getElementById('formSub').innerHTML = '<option value="">General</option>' + (cat?.subs.map(s => `<option>${s}</option>`).join('') || '');
@@ -700,7 +710,6 @@ function saveExpense() {
   else { state.transactions.push(tx); }
   save(); document.getElementById('expenseModal').style.display = 'none'; renderAll(); showToast("Expense logged");
 }
-
 window.onload = init;
 </script>
 </body>
